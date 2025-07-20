@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import api from '../services/api';
 import { Box, Button, Typography, Paper, List, ListItem, ListItemText, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface Author {
   id: number;
@@ -19,6 +20,7 @@ const AuthorsPage: React.FC = () => {
   const [editingAuthor, setEditingAuthor] = useState<Author | null>(null);
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchAuthors = async () => {
     const res = await api.get('authors');
@@ -28,6 +30,19 @@ const AuthorsPage: React.FC = () => {
   useEffect(() => {
     fetchAuthors();
   }, []);
+
+  // Filter authors based on search term
+  const filteredAuthors = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return authors;
+    }
+    
+    const term = searchTerm.toLowerCase();
+    return authors.filter(author => 
+      author.name.toLowerCase().includes(term) ||
+      (author.bio && author.bio.toLowerCase().includes(term))
+    );
+  }, [authors, searchTerm]);
 
   const handleOpen = (author?: Author) => {
     if (author) {
@@ -62,12 +77,33 @@ const AuthorsPage: React.FC = () => {
   return (
     <Box p={4}>
       <Typography variant="h4" mb={2}>Authors</Typography>
-      <Button variant="contained" color="primary" onClick={() => handleOpen()} sx={{ mb: 2 }}>
-        Add Author
-      </Button>
+      
+      {/* Search and Add Author Section */}
+      <Box display="flex" gap={2} alignItems="center" mb={2}>
+        <TextField
+          label="Search authors..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          variant="outlined"
+          size="small"
+          sx={{ minWidth: 300 }}
+          InputProps={{
+            startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+          }}
+        />
+        <Button variant="contained" color="primary" onClick={() => handleOpen()}>
+          Add Author
+        </Button>
+      </Box>
+
+      {/* Results count */}
+      <Typography variant="body2" color="text.secondary" mb={1}>
+        Showing {filteredAuthors.length} of {authors.length} authors
+      </Typography>
+
       <Paper>
         <List>
-          {authors.map(author => (
+          {filteredAuthors.map(author => (
             <ListItem key={author.id}
               secondaryAction={
                 <>
@@ -87,6 +123,13 @@ const AuthorsPage: React.FC = () => {
             </ListItem>
           ))}
         </List>
+        {filteredAuthors.length === 0 && (
+          <Box p={3} textAlign="center">
+            <Typography color="text.secondary">
+              {searchTerm ? 'No authors found matching your search.' : 'No authors available.'}
+            </Typography>
+          </Box>
+        )}
       </Paper>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{editingAuthor ? 'Edit Author' : 'Add Author'}</DialogTitle>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import api from '../services/api';
 import {
   Box, Button, Typography, Paper, List, ListItem, ListItemText, IconButton,
@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface User {
   id: number;
@@ -19,6 +20,7 @@ const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [open, setOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Form fields
   const [name, setName] = useState('');
@@ -34,6 +36,20 @@ const UsersPage: React.FC = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  // Filter users based on search term
+  const filteredUsers = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return users;
+    }
+    
+    const term = searchTerm.toLowerCase();
+    return users.filter(user => 
+      user.name.toLowerCase().includes(term) ||
+      user.email.toLowerCase().includes(term) ||
+      (user.milestone && user.milestone.toLowerCase().includes(term))
+    );
+  }, [users, searchTerm]);
 
   const handleOpen = (user?: User) => {
     if (user) {
@@ -76,12 +92,33 @@ const UsersPage: React.FC = () => {
   return (
     <Box p={4}>
       <Typography variant="h4" mb={2}>Users</Typography>
-      <Button variant="contained" color="primary" onClick={() => handleOpen()} sx={{ mb: 2 }}>
-        Add User
-      </Button>
+      
+      {/* Search and Add User Section */}
+      <Box display="flex" gap={2} alignItems="center" mb={2}>
+        <TextField
+          label="Search users..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          variant="outlined"
+          size="small"
+          sx={{ minWidth: 300 }}
+          InputProps={{
+            startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+          }}
+        />
+        <Button variant="contained" color="primary" onClick={() => handleOpen()}>
+          Add User
+        </Button>
+      </Box>
+
+      {/* Results count */}
+      <Typography variant="body2" color="text.secondary" mb={1}>
+        Showing {filteredUsers.length} of {users.length} users
+      </Typography>
+
       <Paper>
         <List>
-          {users.map(user => (
+          {filteredUsers.map(user => (
             <ListItem key={user.id}
               secondaryAction={
                 <>
@@ -106,7 +143,15 @@ const UsersPage: React.FC = () => {
             </ListItem>
           ))}
         </List>
+        {filteredUsers.length === 0 && (
+          <Box p={3} textAlign="center">
+            <Typography color="text.secondary">
+              {searchTerm ? 'No users found matching your search.' : 'No users available.'}
+            </Typography>
+          </Box>
+        )}
       </Paper>
+
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{editingUser ? 'Edit User' : 'Add User'}</DialogTitle>
         <DialogContent>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import api from '../services/api';
 import {
   Box, Button, Typography, Paper, List, ListItem, ListItemText, IconButton,
@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface Author {
   id: number;
@@ -30,6 +31,7 @@ const BooksPage: React.FC = () => {
   const [authors, setAuthors] = useState<Author[]>([]);
   const [open, setOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -52,6 +54,25 @@ const BooksPage: React.FC = () => {
     fetchBooks();
     fetchAuthors();
   }, []);
+
+  // Filter books based on search term
+  const filteredBooks = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return books;
+    }
+    
+    const term = searchTerm.toLowerCase();
+    return books.filter(book => {
+      const authorName = authors.find(a => a.id === book.author_id)?.name || '';
+      return (
+        book.title.toLowerCase().includes(term) ||
+        (book.description && book.description.toLowerCase().includes(term)) ||
+        book.genre.toLowerCase().includes(term) ||
+        authorName.toLowerCase().includes(term) ||
+        book.published_year.toString().includes(term)
+      );
+    });
+  }, [books, authors, searchTerm]);
 
   const handleOpen = (book?: Book) => {
     if (book) {
@@ -99,12 +120,33 @@ const BooksPage: React.FC = () => {
   return (
     <Box p={4}>
       <Typography variant="h4" mb={2}>Books</Typography>
-      <Button variant="contained" color="primary" onClick={() => handleOpen()} sx={{ mb: 2 }}>
-        Add Book
-      </Button>
+      
+      {/* Search and Add Book Section */}
+      <Box display="flex" gap={2} alignItems="center" mb={2}>
+        <TextField
+          label="Search books..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          variant="outlined"
+          size="small"
+          sx={{ minWidth: 300 }}
+          InputProps={{
+            startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+          }}
+        />
+        <Button variant="contained" color="primary" onClick={() => handleOpen()}>
+          Add Book
+        </Button>
+      </Box>
+
+      {/* Results count */}
+      <Typography variant="body2" color="text.secondary" mb={1}>
+        Showing {filteredBooks.length} of {books.length} books
+      </Typography>
+
       <Paper>
         <List>
-          {books.map(book => (
+          {filteredBooks.map(book => (
             <ListItem key={book.id}
               secondaryAction={
                 <>
@@ -128,6 +170,13 @@ const BooksPage: React.FC = () => {
             </ListItem>
           ))}
         </List>
+        {filteredBooks.length === 0 && (
+          <Box p={3} textAlign="center">
+            <Typography color="text.secondary">
+              {searchTerm ? 'No books found matching your search.' : 'No books available.'}
+            </Typography>
+          </Box>
+        )}
       </Paper>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{editingBook ? 'Edit Book' : 'Add Book'}</DialogTitle>
