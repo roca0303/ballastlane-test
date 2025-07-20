@@ -25,6 +25,9 @@ const DashboardPage: React.FC = () => {
           <Button component={Link} to="/books" variant="contained" color="secondary">
             Manage Books
           </Button>
+          <Button component={Link} to="/users" variant="contained" color="info">
+            Manage Users
+          </Button>
           <Button onClick={handleLogout} variant="outlined" color="error" sx={{ mt: 2 }}>
             Sign Out
           </Button>

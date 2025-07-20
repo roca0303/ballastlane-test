@@ -13,11 +13,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Crea 5 usuarios
+        $users = \App\Models\User::factory(5)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $authors = \App\Models\Author::factory(5)->make()->each(function ($author) use ($users) {
+            $author->user_id = $users->random()->id;
+            $author->save();
+        });
+
+        \App\Models\Book::factory(10)->make()->each(function ($book) use ($authors, $users) {
+            $book->author_id = $authors->random()->id;
+            $book->user_id = $users->random()->id;
+            $book->save();
+        });
+
+        $this->call([
+            SuperAdminRoleSeeder::class,
+            SuperAdminPermissionSeeder::class,
+            // Otros seeders...
         ]);
     }
 }

@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AuthorsPage from './pages/AuthorsPage';
 import BooksPage from './pages/BooksPage';
 import NavigationBar from './components/NavigationBar';
+import UsersPage from './pages/UsersPage';
 
 // This component is rendered inside <BrowserRouter>
 function AppWithNav() {
@@ -22,6 +23,14 @@ function AppWithNav() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <UsersPage />
             </ProtectedRoute>
           }
         />
