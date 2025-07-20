@@ -12,7 +12,7 @@ class AuthorFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'bio' => $this->faker->paragraph(),
-            'user_id' => User::factory(), // Relaciona con un usuario
+            'user_id' => User::factory(),
         ];
     }
 }

@@ -13,7 +13,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crea 5 usuarios
         $users = \App\Models\User::factory(5)->create();
 
         $authors = \App\Models\Author::factory(5)->make()->each(function ($author) use ($users) {

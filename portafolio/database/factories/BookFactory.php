@@ -13,8 +13,8 @@ class BookFactory extends Factory
         return [
             'title' => $this->faker->sentence(3),
             'description' => $this->faker->paragraph(),
-            'author_id' => Author::factory(), // Relaciona con un autor
-            'user_id' => User::factory(),     // Relaciona con un usuario
+            'author_id' => Author::factory(),
+            'user_id' => User::factory(),
             'published_year' => $this->faker->year(),
             'genre' => $this->faker->word(),
         ];
