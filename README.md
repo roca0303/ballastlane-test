@@ -64,6 +64,8 @@ docker exec -it portafolio php artisan migrate --seed
 - `/api/authors` (CRUD authors, authenticated)
 - `/api/books` (CRUD books, authenticated)
 
+For login you have to use Accept - application/json as Header
+
 ---
 
 ## Frontend
