@@ -60,9 +60,9 @@ docker exec -it portafolio php artisan migrate --seed
 ---
 
 ## Main API Endpoints
-- `/api/users` (CRUD users, superAdmin only)
-- `/api/authors` (CRUD authors, authenticated)
-- `/api/books` (CRUD books, authenticated)
+- `/portafolio/api/users` (CRUD users, superAdmin only)
+- `/portafolio/api/authors` (CRUD authors, authenticated)
+- `/portafolio/api/books` (CRUD books, authenticated)
 
 For login you have to use Accept - application/json as Header
 
